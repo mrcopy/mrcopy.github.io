@@ -8,7 +8,7 @@ title:               MrcSec
 tagline:             'Just Another Security Blog'
 description:         'A place to share ideas, tutorials & walkthroughs related to Information Security and Penetration Testing'
 url:                 https://mrcopy.github.io
-baseurl:             '/'
+baseurl:             '/blog'
 plugins:
   - jekyll-paginate
 paginate:            5
