@@ -37,7 +37,7 @@ This gives me a 500 Internal Server Error, but when I structure the doc accordin
 
 If I check the URL, I can see that the file is being uploaded.
 
-![Upload Dir]({{site.baseurl}}/assets/htb-devoops/4.png)
+![Upload Dir]({{site.baseurl}}/assets/htb-devoops/5.png)
 
 # Exploitation
 
@@ -126,7 +126,7 @@ PROCESSED BLOGPOST:
  URL for later reference: /uploads/fee.xml
  File path: /home/roosa/deploy/src
 ```
-Result of `user.txt`: c5808e1643e801d40f09ed87cdecc67b.
+> Result of `user.txt`: c5808e1643e801d40f09ed87cdecc67b.
 
 Knowing that I can retrieve documents this way and also knowing that the machine has the port 22 open running OpenSSH, I assume that I can check for the private key of the user to log in through that route.
 
@@ -430,7 +430,7 @@ d4fe1e7f7187407eebdd3209cb1ac7b3
 root@gitter:~#
 ```
 
-Result of `root.txt`: d4fe1e7f7187407eebdd3209cb1ac7b3
+> Result of `root.txt`: d4fe1e7f7187407eebdd3209cb1ac7b3
 
 # Conclusion
 
@@ -439,6 +439,30 @@ Pretty straightforward machine. Initial access was a bit tricky at first, but on
 In the privilege escalation section, this machine is a good reminder that it's always a good idea to know what commands the user has been running previously. The command `history` is crucial for this: valuable information can be shown if one looks at the past.
 
 Lastly, it's also important to know `git` and how it works. 
+
+**Edit on 08-07-19** 
+
+So, after I wrote the post I checked some of other people's solutions for the machine and found out that I rooted it in an unintended way. Apparently, the creator of the box missed the fact that after injecting the code in the XML file, one could retrieve the *.ssh/id_rsa* file and log in directly through `ssh`. 
+
+The inteded way seems to be to check the code of the *feed.py* file and find the */newpost* function and read it. 
+
+```
+...
+@app.route("/newpost", methods=["POST"])
+def newpost():
+  # TODO: proper save to database, this is for testing purposes right now
+  picklestr = base64.urlsafe_b64decode(request.data)
+#  return picklestr
+  postObj = pickle.loads(picklestr)
+  return "POST RECEIVED: " + postObj['Subject']
+...
+```
+
+The goal here is to check `pickle`, do some Google-fu and find that [it's vulnerable](https://blog.nelhage.com/2011/03/exploiting-pickle/). This will give you a similar shell, with roosa's permissions. 
+
+After this, the privilege escalation part is the same: finding out about the commands, the repository on the */work* folder and so on. 
+
+Pretty interesting to know more about the different ways one can access this box.
 
 
 # Sources
